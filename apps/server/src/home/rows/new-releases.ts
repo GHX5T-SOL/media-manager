@@ -23,11 +23,11 @@ export const newReleasesFetcher: RowFetcher = {
     const page = readPage(opts.cursor);
     const today = Math.floor(Date.now() / DAY_MS) * DAY_MS;
 
-    const snapshot = await ctx.catalogService.getDiscoverFeed(
-      "newReleases",
-      "popularity_desc",
-      today,
-    );
+    // Catalog query failures (missing migration, truncated blob,
+    // transient SQLite lock) must degrade to the live discover path
+    // rather than collapsing the row. The catalog is a performance
+    // layer, not a correctness boundary.
+    const snapshot = await readSnapshot(ctx, today);
     if (snapshot && snapshot.length > 0) {
       return hydrateFromSnapshot(ctx, snapshot, page, opts.limit);
     }
@@ -42,6 +42,17 @@ export const newReleasesFetcher: RowFetcher = {
     return true;
   },
 };
+
+async function readSnapshot(ctx: RowFetchContext, today: number): Promise<MetadataKey[] | null> {
+  try {
+    return await ctx.catalogService.getDiscoverFeed("newReleases", "popularity_desc", today);
+  } catch (err) {
+    ctx.logger.warn(
+      `[home/new-releases] catalog read failed; falling back to live discover: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return null;
+  }
+}
 
 async function hydrateFromSnapshot(
   ctx: RowFetchContext,

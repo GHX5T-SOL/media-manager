@@ -192,6 +192,26 @@ describe("recommendedForYou catalog hydration", () => {
     expect("x" in decoded).toBe(true);
   });
 
+  it("falls back to the live recommendations feed when the catalog read throws", async () => {
+    // Regression: missing migration, truncated JSON blob, or transient
+    // SQLite lock used to surface the underlying query error and collapse
+    // the row to `all_failed`. The catalog is a performance layer; failure
+    // must degrade to the live path so the row still renders.
+    const media = makeMediaServiceStub();
+    const ctx = makeCtx(media, { list: null, rows: {} });
+    ctx.catalogService = {
+      getRecommendations: vi.fn(async () => {
+        throw new Error("Failed query: select … from recommendation_lists");
+      }),
+      getMetadataBatch: vi.fn(async () => ({})),
+    } as unknown as RowFetchContext["catalogService"];
+
+    const result = await recommendedForYouFetcher.fetch(ctx, { cursor: null, limit: 20 });
+
+    expect(media.getRecommendationsFeed).toHaveBeenCalledOnce();
+    expect(result.items).toBeDefined();
+  });
+
   it("flags partial when the metadata batch is missing rows", async () => {
     const media = makeMediaServiceStub();
     const items: RecItem[] = [

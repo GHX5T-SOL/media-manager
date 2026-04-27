@@ -25,7 +25,11 @@ export const recommendedForYouFetcher: RowFetcher = {
   requires: ["recommendations@v1"],
 
   async fetch(ctx: RowFetchContext, opts: RowFetchOptions): Promise<RowFetchResult> {
-    const list = await ctx.catalogService.getRecommendations(ctx.userId, "default");
+    // Catalog query failures (missing migration on a fresh dev DB,
+    // truncated JSON blob, transient SQLite lock, etc.) must degrade to
+    // the live path rather than collapsing the row. The catalog is a
+    // performance layer, not a correctness boundary.
+    const list = await readCatalogList(ctx);
     if (list && list.items.length > 0) {
       return hydrateFromCatalog(ctx, list.items, list.profileVersion, opts);
     }
@@ -40,6 +44,19 @@ export const recommendedForYouFetcher: RowFetcher = {
 interface RankedItem {
   item: RawMediaItem;
   matchReason: string | null;
+}
+
+async function readCatalogList(
+  ctx: RowFetchContext,
+): Promise<Awaited<ReturnType<RowFetchContext["catalogService"]["getRecommendations"]>> | null> {
+  try {
+    return await ctx.catalogService.getRecommendations(ctx.userId, "default");
+  } catch (err) {
+    ctx.logger.warn(
+      `[home/rfy] catalog read failed; falling back to live recommendations: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return null;
+  }
 }
 
 /**

@@ -116,6 +116,26 @@ describe("newReleases fetcher catalog hydration", () => {
     expect(media.discoverFeed).not.toHaveBeenCalled();
   });
 
+  it("falls back to the live discover feed when the catalog read throws", async () => {
+    // Regression: missing migration / truncated JSON / transient SQLite
+    // lock used to bubble the catalog error up and collapse the row to
+    // `all_failed`. Catalog is a performance layer; failure degrades to
+    // live so the row still renders.
+    const media = makeMediaServiceStub();
+    const ctx = makeCtx(media, { snapshot: null, rows: {} });
+    ctx.catalogService = {
+      getDiscoverFeed: vi.fn(async () => {
+        throw new Error("Failed query: select … from discover_snapshots");
+      }),
+      getMetadataBatch: vi.fn(async () => ({})),
+    } as unknown as RowFetchContext["catalogService"];
+
+    const result = await newReleasesFetcher.fetch(ctx, { cursor: null, limit: 20 });
+
+    expect(media.discoverFeed).toHaveBeenCalledOnce();
+    expect(result.items).toBeDefined();
+  });
+
   it("emits an empty page with partial=true when every metadata batch row is cold", async () => {
     const media = makeMediaServiceStub();
     const key: MetadataKey = { tmdbId: "999", type: "movie" };
