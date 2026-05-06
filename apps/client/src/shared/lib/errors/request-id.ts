@@ -1,6 +1,8 @@
-const REQUEST_ID_HEADER = "X-Request-Id";
+export const REQUEST_ID_HEADER = "X-Request-Id";
 
-function generateId(): string {
+/** Generates a fresh request id, preferring `crypto.randomUUID()` and falling back
+ *  to a base36-random + timestamp combo for environments without it. */
+export function newRequestId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
@@ -11,23 +13,3 @@ function generateId(): string {
 export function shortRequestId(requestId: string): string {
   return requestId.replace(/-/g, "").slice(0, 8);
 }
-
-/** Fetch wrapper that stamps `X-Request-Id` on every outbound request and exposes the
- *  final request id to the caller via a returned tuple. The request id is generated if
- *  the server did not echo one back previously. */
-export async function fetchWithRequestId(
-  input: RequestInfo | URL,
-  init: RequestInit = {},
-): Promise<{ response: Response; requestId: string }> {
-  const headers = new Headers(init.headers);
-  let requestId = headers.get(REQUEST_ID_HEADER);
-  if (!requestId) {
-    requestId = generateId();
-    headers.set(REQUEST_ID_HEADER, requestId);
-  }
-  const response = await fetch(input, { ...init, headers });
-  const echoed = response.headers.get(REQUEST_ID_HEADER);
-  return { response, requestId: echoed ?? requestId };
-}
-
-export { REQUEST_ID_HEADER };

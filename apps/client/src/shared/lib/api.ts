@@ -1,6 +1,6 @@
 import { hc } from "hono/client";
 import type { AppType } from "@ent-mcp/server/api/router";
-import { REQUEST_ID_HEADER } from "./errors/request-id";
+import { REQUEST_ID_HEADER, newRequestId } from "./errors/request-id";
 import { reportError } from "./errors/report";
 
 /** Custom fetch used by the Hono RPC client. Stamps a request id on every outbound
@@ -15,10 +15,7 @@ async function instrumentedFetch(
   const headers = new Headers(init.headers);
   let requestId = headers.get(REQUEST_ID_HEADER);
   if (!requestId) {
-    requestId =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `rid_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
+    requestId = newRequestId();
     headers.set(REQUEST_ID_HEADER, requestId);
   }
   const response = await fetch(input, { ...init, headers });
