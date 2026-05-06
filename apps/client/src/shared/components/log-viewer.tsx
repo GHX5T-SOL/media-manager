@@ -13,6 +13,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useCopy } from "@/shared/hooks/use-copy";
 import { cn } from "@/shared/lib/utils";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/shared/ui/collapsible";
 import { JsonViewer } from "@/shared/components/json-viewer";
@@ -153,22 +154,6 @@ function formatTimestampFull(ts?: string): string {
     minute: "2-digit",
     second: "2-digit",
   })}.${ms}`;
-}
-
-function useCopy() {
-  const [copied, setCopied] = React.useState(false);
-
-  const copy = React.useCallback(async (value: string) => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard API unavailable in insecure contexts
-    }
-  }, []);
-
-  return { copied, copy };
 }
 
 function useAutoScroll(entries: LogEntry[], enabled: boolean) {

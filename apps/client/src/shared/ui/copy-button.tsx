@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { ClipboardCopyIcon, CheckIcon } from "lucide-react";
 
 import { Button, buttonVariants } from "@/shared/ui/button";
+import { useCopy } from "@/shared/hooks/use-copy";
 import { cn } from "@/shared/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 
@@ -22,25 +22,14 @@ function CopyButton({
   iconClassName,
   title = "Copy to clipboard",
 }: CopyButtonProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard unavailable; ignore silently.
-    }
-  };
-
+  const { copied, copy } = useCopy();
   const Icon = copied ? CheckIcon : ClipboardCopyIcon;
 
   return (
     <Button
       variant={variant}
       size={size}
-      onClick={handleCopy}
+      onClick={() => void copy(value)}
       title={title}
       className={cn(className)}
     >
