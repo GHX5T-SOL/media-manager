@@ -4,6 +4,7 @@ import { CheckIcon, LoaderCircleIcon, TriangleAlertIcon } from "lucide-react";
 
 import { Button } from "@/shared/ui/button";
 import { api } from "@/shared/lib/api";
+import { safeJson } from "@/shared/lib/errors/safe-json";
 
 export const Route = createFileRoute("/_authenticated/_settings/oauth-callback")({
   component: OAuthCallbackPage,
@@ -124,12 +125,4 @@ function OAuthCallbackPage() {
       </div>
     </div>
   );
-}
-
-async function safeJson(res: Response): Promise<unknown> {
-  try {
-    return await res.json();
-  } catch {
-    return null;
-  }
 }
