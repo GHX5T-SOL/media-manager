@@ -18,6 +18,7 @@ import { Input } from "@/shared/ui/input";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { SessionRow, type SessionListItem } from "@/features/settings";
 import { authClient } from "@/shared/lib/auth";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 
 // ─── Route ────────────────────────────────────────────────────────────────────
 
@@ -91,7 +92,7 @@ export function ChangePasswordCard() {
     onError: (err: unknown) => {
       const status = (err as { status?: number } | null)?.status;
       const code = (err as { code?: string } | null)?.code;
-      const message = (err as { message?: string } | null)?.message ?? "Could not update password.";
+      const message = errorMessage(err, "Could not update password.");
 
       // Better Auth tags wrong-current-password as `code: "INVALID_PASSWORD"`
       // (status 400). The OpenAPI doc also lists 401. Match the explicit code
@@ -275,7 +276,7 @@ export function ActiveSessionsCard() {
       setConfirmRevoke(null);
     },
     onError: (err: unknown) => {
-      toast.error((err as { message?: string } | null)?.message ?? "Failed to revoke session.");
+      toast.error(errorMessage(err, "Failed to revoke session."));
     },
   });
 
@@ -293,9 +294,7 @@ export function ActiveSessionsCard() {
       setConfirmSignOutAll(false);
     },
     onError: (err: unknown) => {
-      toast.error(
-        (err as { message?: string } | null)?.message ?? "Could not sign out everywhere.",
-      );
+      toast.error(errorMessage(err, "Could not sign out everywhere."));
     },
   });
 

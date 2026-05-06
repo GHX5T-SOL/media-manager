@@ -32,6 +32,7 @@ import { Skeleton } from "@/shared/ui/skeleton";
 import { Switch } from "@/shared/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 import { api } from "@/shared/lib/api";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 import { useNow } from "@/shared/hooks/use-now";
 import type { JSONSchema } from "@ent-mcp/shared";
 
@@ -293,7 +294,7 @@ function CredentialRow({
     // the parent plugin row needs to refetch alongside the local list.
     onSuccess: () => onPoolChange(),
     onError: (err: unknown) => {
-      toast.error(err instanceof Error ? err.message : "Couldn't update credential.");
+      toast.error(errorMessage(err, "Couldn't update credential."));
     },
   });
 
@@ -426,7 +427,7 @@ function DeleteCredentialDialog({
       onClose();
     },
     onError: (err: unknown) => {
-      toast.error(err instanceof Error ? err.message : "Couldn't delete credential.");
+      toast.error(errorMessage(err, "Couldn't delete credential."));
     },
   });
 

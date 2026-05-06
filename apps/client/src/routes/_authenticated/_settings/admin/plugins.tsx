@@ -54,6 +54,7 @@ import {
   validateSchema,
 } from "@/shared/components/schema-form";
 import { PersonalKeyFallbackControl, SharedCredentialsSection } from "@/features/admin";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 import { safeJson } from "@/shared/lib/errors/safe-json";
 
 export const Route = createFileRoute("/_authenticated/_settings/admin/plugins")({
@@ -421,7 +422,7 @@ function GlobalConfigBody({
           });
         }
       } catch (err) {
-        if (!cancelled) setTopError(err instanceof Error ? err.message : "Failed to load config.");
+        if (!cancelled) setTopError(errorMessage(err, "Failed to load config."));
       } finally {
         if (!cancelled) setLoaded(true);
       }
@@ -450,7 +451,7 @@ function GlobalConfigBody({
       onSaved();
       onClose();
     } catch (err) {
-      setTopError(err instanceof Error ? err.message : "Failed to save.");
+      setTopError(errorMessage(err, "Failed to save."));
     } finally {
       setSaving(false);
     }
@@ -564,7 +565,7 @@ function UninstallDialog({
       onRemoved();
       onOpenChange(false);
     } catch (err) {
-      setTopError(err instanceof Error ? err.message : "Failed to uninstall.");
+      setTopError(errorMessage(err, "Failed to uninstall."));
     } finally {
       setPending(false);
     }
@@ -741,7 +742,7 @@ function AllowlistPanel({ plugin, onChanged }: AdvancedSectionProps) {
       }
       onChanged();
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Failed to save allowlist.");
+      setSaveError(errorMessage(err, "Failed to save allowlist."));
     } finally {
       setSaving(false);
     }
@@ -873,7 +874,7 @@ function HeadersPanel({ plugin, onChanged }: AdvancedSectionProps) {
       }
       onChanged();
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : "Failed to delete header.");
+      setDeleteError(errorMessage(err, "Failed to delete header."));
     }
   };
 
@@ -1016,7 +1017,7 @@ function HeaderDialog({ plugin, state, onClose, onSaved }: HeaderDialogProps) {
       }
       onSaved();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save header.");
+      setError(errorMessage(err, "Failed to save header."));
     } finally {
       setSaving(false);
     }

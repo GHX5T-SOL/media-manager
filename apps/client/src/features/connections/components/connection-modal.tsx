@@ -25,6 +25,7 @@ import {
   type CapabilityEntry,
 } from "@/shared/lib/capabilities";
 import { api } from "@/shared/lib/api";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 import {
   parseFormErrorResponse,
   splitFormError,
@@ -188,7 +189,7 @@ export function ConnectionModal({ open, plugin, existing, onOpenChange, onSucces
         }
       } catch (err) {
         if (cancelled) return;
-        setDevice({ kind: "err", message: err instanceof Error ? err.message : "Polling failed." });
+        setDevice({ kind: "err", message: errorMessage(err, "Polling failed.") });
       }
     }, intervalSec * 1000);
     return () => {
@@ -297,7 +298,7 @@ export function ConnectionModal({ open, plugin, existing, onOpenChange, onSucces
       }
     } catch (err) {
       setTest({ kind: "err" });
-      setTopError(err instanceof Error ? err.message : "Test failed.");
+      setTopError(errorMessage(err, "Test failed."));
     }
   };
 
@@ -326,7 +327,7 @@ export function ConnectionModal({ open, plugin, existing, onOpenChange, onSucces
       onSuccess();
       onOpenChange(false);
     } catch (err) {
-      setTopError(err instanceof Error ? err.message : "Something went wrong.");
+      setTopError(errorMessage(err, "Something went wrong."));
     } finally {
       setSaving(false);
     }
@@ -372,7 +373,7 @@ export function ConnectionModal({ open, plugin, existing, onOpenChange, onSucces
       onSuccess();
       onOpenChange(false);
     } catch (err) {
-      setTopError(err instanceof Error ? err.message : "Something went wrong.");
+      setTopError(errorMessage(err, "Something went wrong."));
     } finally {
       setSaving(false);
     }
@@ -397,7 +398,7 @@ export function ConnectionModal({ open, plugin, existing, onOpenChange, onSucces
       setNow(Date.now());
       setDevice({ kind: "waiting", ...body });
     } catch (err) {
-      setDevice({ kind: "err", message: err instanceof Error ? err.message : "Failed to start." });
+      setDevice({ kind: "err", message: errorMessage(err, "Failed to start.") });
     }
   };
 
@@ -421,7 +422,7 @@ export function ConnectionModal({ open, plugin, existing, onOpenChange, onSucces
       window.location.assign(body.redirectUrl);
     } catch (err) {
       setSaving(false);
-      setTopError(err instanceof Error ? err.message : "Failed to start authorization.");
+      setTopError(errorMessage(err, "Failed to start authorization."));
     }
   };
 

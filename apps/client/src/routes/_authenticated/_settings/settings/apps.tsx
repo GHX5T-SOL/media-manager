@@ -24,6 +24,7 @@ import {
 import { Skeleton } from "@/shared/ui/skeleton";
 import { AuthorizedAppRow } from "@/features/settings";
 import { api } from "@/shared/lib/api";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 
 export const Route = createFileRoute("/_authenticated/_settings/settings/apps")({
   component: AuthorizedAppsSection,
@@ -120,7 +121,7 @@ export function AppsList() {
         setConfirmRevoke(null);
         return;
       }
-      const message = (err as { message?: string } | null)?.message ?? "Could not revoke.";
+      const message = errorMessage(err, "Could not revoke.");
       toast.error(message);
     },
   });

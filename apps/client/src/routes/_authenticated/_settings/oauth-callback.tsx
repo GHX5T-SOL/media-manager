@@ -4,6 +4,7 @@ import { CheckIcon, LoaderCircleIcon, TriangleAlertIcon } from "lucide-react";
 
 import { Button } from "@/shared/ui/button";
 import { api } from "@/shared/lib/api";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 import { safeJson } from "@/shared/lib/errors/safe-json";
 
 export const Route = createFileRoute("/_authenticated/_settings/oauth-callback")({
@@ -79,7 +80,7 @@ function OAuthCallbackPage() {
       } catch (err) {
         setState({
           kind: "error",
-          message: err instanceof Error ? err.message : "Authorization failed.",
+          message: errorMessage(err, "Authorization failed."),
         });
       }
     })();

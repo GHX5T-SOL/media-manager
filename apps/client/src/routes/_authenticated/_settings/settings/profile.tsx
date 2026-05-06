@@ -19,6 +19,7 @@ import { Input } from "@/shared/ui/input";
 import { UserAvatar } from "@/shared/components/user-avatar";
 import { api } from "@/shared/lib/api";
 import { authClient } from "@/shared/lib/auth";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 
 export const Route = createFileRoute("/_authenticated/_settings/settings/profile")({
   component: ProfileSection,
@@ -107,7 +108,7 @@ export function NameField({ currentName }: { currentName: string }) {
       setError(null);
     },
     onError: (err: unknown) => {
-      const message = (err as { message?: string } | null)?.message ?? "Could not update name.";
+      const message = errorMessage(err, "Could not update name.");
       setError(message);
     },
   });
@@ -175,7 +176,7 @@ export function EmailField({
       setError(null);
     },
     onError: (err: unknown) => {
-      const message = (err as { message?: string } | null)?.message ?? "Could not change email.";
+      const message = errorMessage(err, "Could not change email.");
       setError(message);
     },
   });
@@ -194,7 +195,7 @@ export function EmailField({
       setError(null);
     },
     onError: (err: unknown) => {
-      const message = (err as { message?: string } | null)?.message ?? "Could not change email.";
+      const message = errorMessage(err, "Could not change email.");
       setError(message);
     },
   });
@@ -378,7 +379,7 @@ export function VerificationBanner({ email }: { email: string }) {
       setCooldown(VERIFICATION_COUNTDOWN_SECONDS);
     },
     onError: (err: unknown) => {
-      const message = (err as { message?: string } | null)?.message ?? "Could not resend.";
+      const message = errorMessage(err, "Could not resend.");
       toast.error(message);
     },
   });

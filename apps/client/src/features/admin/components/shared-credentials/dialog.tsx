@@ -29,6 +29,7 @@ import {
   type FormErrorBody,
   type FormErrorResult,
 } from "@/shared/lib/errors/form-errors";
+import { errorMessage } from "@/shared/lib/errors/error-message";
 import { safeJson } from "@/shared/lib/errors/safe-json";
 import { cn } from "@/shared/lib/utils";
 import type { JSONSchema } from "@ent-mcp/shared";
@@ -180,7 +181,7 @@ export function SharedCredentialDialog({
       }
     },
     onError: (err: unknown) => {
-      setTopError(err instanceof Error ? err.message : "Failed to save.");
+      setTopError(errorMessage(err, "Failed to save."));
     },
   });
 
@@ -218,7 +219,7 @@ export function SharedCredentialDialog({
       // Test passed — persist immediately.
       saveMutation.mutate();
     } catch (err) {
-      setTest({ kind: "err", message: err instanceof Error ? err.message : "Test failed." });
+      setTest({ kind: "err", message: errorMessage(err, "Test failed.") });
     }
   };
 
