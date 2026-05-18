@@ -737,6 +737,7 @@ oauthProvider({
   consentPage: "/consent",
   allowDynamicClientRegistration: true,
   allowUnauthenticatedClientRegistration: true, // MCP clients self-register
+  rateLimit: { register: { window: 60 * 60, max: 5 } }, // cap DCR @ 5/h/IP
   validAudiences: [BASE_URL, `${BASE_URL}/api/mcp`],
   scopes: ["openid", "profile", "email", "offline_access", ...MCP_SCOPES],
   clientRegistrationAllowedScopes: MCP_SCOPES,
@@ -788,7 +789,7 @@ Stateless at app level. MCP session IDs live in Postgres & Redis via `CacheProvi
 
 2 layers:
 
-1. **Better Auth's built-in per-IP rate limiting** on OAuth endpoints (`/oauth2/token`, `/oauth2/authorize`, etc.). Defaults fine.
+1. **Better Auth's built-in per-IP rate limiting** on OAuth endpoints (`/oauth2/token`, `/oauth2/authorize`, etc.). Defaults fine for authenticated endpoints. DCR (`/oauth2/register`) overrides default (5/min → 5/h) since open registration grows the `oauth-clients` table on every call & honest MCP clients only register once per install. Accepted trade-off: shared-egress IPs (corporate NAT, home router during simultaneous onboarding) can hit cap; revisit if/when multi-tenant deployment surfaces.
 2. **Per-user MCP rate limiting** on `/api/mcp`: token bucket keyed by JWT `sub`, default 60 tool calls per minute, configurable via env. Excess → `mcp.rate_limited` with `retry_after` param.
 
 Per-user limit prevents over-eager agent from hammering server (& transitively external APIs). Per-external-API rate limits remain responsibility of each plugin's `ctx.fetch` enforcement.
