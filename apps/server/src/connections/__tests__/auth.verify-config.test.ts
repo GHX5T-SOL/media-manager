@@ -20,19 +20,12 @@ vi.mock("../../plugin-runtime", async () => {
   };
 });
 
-const writeConnection = vi.fn();
-vi.mock("../helpers", async () => {
-  const actual = await vi.importActual<typeof import("../helpers")>("../helpers");
-  return { ...actual, writeConnection };
-});
-
 const { verifyConfig } = await import("../auth");
 
 describe("verifyConfig — x-plugin-resolved field stripping", () => {
   beforeEach(() => {
     runAuth.mockReset();
     getModule.mockReset();
-    writeConnection.mockReset();
   });
 
   it("strips x-plugin-resolved fields before passing userConfig to startAuth", async () => {
