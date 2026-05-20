@@ -231,6 +231,22 @@ describe("validatePluginModule", () => {
     expectPluginError(() => validatePluginModule(module), "plugin.input_invalid");
   });
 
+  it("rejects perRowTimeoutSec of 0 (must be positive integer)", () => {
+    const manifest = makeGlobalManifest({
+      jobs: [
+        {
+          id: "sync",
+          schedule: "0 * * * *",
+          handler: "syncHandler",
+          perConnection: true,
+          perRowTimeoutSec: 0,
+        },
+      ],
+    });
+    const module = makeGlobalModule({ manifest, jobs: { syncHandler: async () => undefined } });
+    expectPluginError(() => validatePluginModule(module), "plugin.input_invalid");
+  });
+
   it("rejects perRowTimeoutSec on a non-perConnection job (silent-ignore guard)", () => {
     // Setting the override on a global (non-perConnection) job is meaningless
     // because there is no per-row loop. Failing loudly avoids the trap where

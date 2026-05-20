@@ -38,7 +38,11 @@ export interface ManifestJobEntry {
   /**
    * Override the default 60s per-row timeout for `perConnection` jobs. Use for
    * upstreams that legitimately need more time per page (e.g. slow Seerr
-   * `/request` pagination). Ignored for non-per-connection jobs.
+   * `/request` pagination). Setting this on a non-perConnection job is a
+   * validation error — the host scheduler has no per-row loop to apply it to.
+   * Capped at 1800s (the run-timeout ceiling); values near the cap interact
+   * with `DEFAULT_RUN_TIMEOUT_SEC` — only `floor(1800 / perRowTimeoutSec)`
+   * connections finish before the run timeout fires.
    */
   perRowTimeoutSec?: number;
 }
